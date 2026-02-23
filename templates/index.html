@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Gestura | Sign Language Translator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success-grad: linear-gradient(180deg, #10b981, #089f91);
+      --warning-grad: linear-gradient(135deg, #f59e0b, #f97316);
+      --dark: #111827;
+      --light-bg: #f1f5f9;
+      --glass: rgba(255, 255, 255, 0.9);
+    }
+
+    * { box-sizing: border-box; transition: all 0.2s ease; }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      background-color: #f1f5f9;
+      color: var(--dark);
+      scroll-behavior: smooth;
+    }
+
+    /* --- Animations --- */
+    @keyframes pulse-live {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* --- Navigation --- */
+    nav {
+      padding: 1rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .nav-logo {
+      font-family: 'Inter', sans-serif;
+      font-weight:800;
+      font-size:18px;
+      color:#2563eb;
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a { text-decoration: none; color: var(--dark); font-weight: 600; font-size: 0.9rem; }
+    .nav-links a:hover { color: var(--primary); }
+
+    html { scroll-behavior: smooth; }
+
+    /* --- Hero Section --- */
+    .hero {
+      padding: 70px 20px;
+      text-align: center;
+      background:linear-gradient(135deg,#2563eb,#4f46e5);
+    }
+
+    .hero h1 { font-size: 42px; font-weight: 900; margin-bottom: 0.5rem; color: white; }
+    .hero h2 { font-size: 35px; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; color: white; }
+    .hero p { font-size: 15px; color: white; max-width: 700px; margin: 0 auto 2rem; line-height: 1.6; }
+    .cta-btn {
+      display: inline-block;
+      background: white;
+      color: #2563eb;
+      padding: 16px 32px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+    }
+    .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3); background: #1d4ed8; color: white; }
+    
+    /* --- Features Section --- */
+    .features { padding: 30px 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; }
+    .feat-card { background: white; padding: 30px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .feat-card h3 { color: var(--primary); margin-top: 0; font-weight: 800; text-align: center;}
+    .feat-card p { color: #64748b; line-height: 1.5; margin-bottom: 0; text-align: justify;}
+
+    /* --- Lab Interface --- */
+    .lab-section { padding: 40px 5%; background: #f1f5f9; }
+    .lab-header { text-align: center; margin-bottom: 40px; }
+    .lab-header h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; }
+    .lab-header p { color: #64748b; font-size: 1.1rem; }
+
+    .main-card {
+      max-width: 1180px; margin: 0 auto;
+      background: white; border-radius: 24px; overflow: hidden;
+      box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+      display: flex; flex-direction: column;
+    }
+
+    .lab-tabs { 
+      display: flex; gap: 15px; padding: 20px; 
+      border-bottom: 1px solid #eef2ff; justify-content: center; background: #fff;
+    }
+    .tab {
+      padding: 14px 28px; border-radius: 12px; cursor: pointer;
+      font-weight: 700; color: #64748b; font-size: 16px;
+      border: 2px solid transparent;
+    }
+    .tab.active { 
+      background: #eef2ff; color: var(--primary); border-color: #dbeafe;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Synchronized 500px Height */
+    .layout { display: flex; height: 500px; }
+    .left-panel { flex: 3; background: #fff; padding: 18px; display: flex; flex-direction: column; }
+    .webcam { height: 100%; border-radius: 12px; overflow: hidden; background: #000; position: relative; }
+    .webcam img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .live-tag { 
+      position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.5); 
+      color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 11px; 
+      font-weight: 800; display: flex; align-items: center;
+    }
+    .live-tag::before { content: "●"; margin-right: 5px; animation: pulse-live 1.5s infinite; }
+
+    .right-panel { flex: 2; padding: 20px; border-left: 1px solid #eef2ff; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+    .module-panel { width: 100%; display: flex; flex-direction: column; align-items: center; animation: slideIn 0.4s ease-out forwards; }
+
+    .gesture-text { font-size: 52px; font-weight: 800; color: #1d4ed8; margin: 5px 0; text-align: center; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    
+    /* --- NEW CONFIDENCE PROGRESS BAR STYLES --- */
+    .confidence-wrapper {
+      width: 80%;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .confidence-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .confidence-bar-container {
+      width: 100%;
+      height: 10px;
+      background-color: #e5e7eb;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .confidence-bar-fill {
+      width: 0%;
+      height: 100%;
+      background-color: #ef4444; /* Default red */
+      transition: width 0.5s ease, background-color 0.5s ease;
+    }
+
+    .typed-box {
+      background: #f8fafc; border-radius: 10px; padding: 12px; min-height: 46px; width: 100%;
+      display: flex; align-items: center; justify-content: center; border: 1px solid #eef2ff;
+      color: #111827; font-size: 14px; font-weight: 700; margin-bottom: 15px;
+    }
+
+    /* Buttons */
+    .btn-main, .btn-speak, .btn-generate { border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: inherit; }
+    .btn-main:hover, .btn-speak:hover, .btn-generate:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+    .btn-main:active, .btn-speak:active, .btn-generate:active { transform: translateY(1px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
+    .btn-main { background: #2563eb; color: #fff; padding: 12px 32px; border-radius: 28px; font-weight: 800; margin-bottom: 14px; width: 100%; }
+    .btn-row { display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 14px; width: 100%; }
+    .btn-small { background: #fff; border: 1px solid #e5e7eb; padding: 9px 18px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 13px; box-shadow: 0 6px 18px rgba(15,23,42,0.04); }
+    .btn-speak { background: var(--success-grad); color: #fff; padding: 12px 36px; border-radius: 34px; font-weight: 800; box-shadow: 0 14px 30px rgba(16,185,129,0.14); margin-bottom: 14px; }
+    .btn-generate { background: var(--warning-grad); color: #fff; padding: 12px 36px; border-radius: 999px; font-weight: 800; margin-bottom: 14px; }
+    .lang-select { padding: 10px 14px; border-radius: 10px; border: 1px solid #d1d5db; font-size: 15px; font-weight: 700; background: white; width: 160px; }
+
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; height: auto; }
+      .left-panel { height: 300px; flex: none; width: 100%; }
+      .right-panel { border-left: none; border-top: 1px solid #eef2ff; flex: none; width: 100%; }
+      .lab-tabs { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">Gestura: Sign Language Translation </div>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#features">Features</a>
+      <a href="#demo">Live Demo</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="home">
+    <div style="font-weight: 800; font-size: 25px; letter-spacing: 0.1em; color: white; margin-bottom: 10px;">
+      GESTURA: SIGN LANGUAGE TRANSLATION
+    </div>
+    <h1>Breaking Communication Barriers</h1>
+    <p>Empowering seamless communication through real-time AI translation. Bridge the gap between signers and non-signers instantly.</p>
+    <a href="#demo" class="cta-btn">Try Live Demo</a>
+  </header>
+
+  <section class="features" id="features">
+    <div class="lab-header" style=" margin-bottom: 1px; text-align: center; grid-column: 1 / -1;">
+      <h2>Features of Gestura</h2>
+    </div>
+    <div class="feat-card">
+      <h3> Alphabet</h3>
+      <p>Master finger-spelling with high-accuracy static hand pose detection. Perfect for names and spelling.</p>
+    </div>
+    <div class="feat-card">
+      <h3>Dynamic Words</h3>
+      <p>Recognize complex motion-based signs for common phrases and vocabulary with temporal analysis.</p>
+    </div>
+    <div class="feat-card">
+      <h3>Conversation</h3>
+      <p>Our AI assembles gestures into natural sentences, providing context-aware translations.</p>
+    </div>
+  </section>
+
+  <section class="lab-section" id="demo">
+    <div class="lab-header">
+      <h2>Interactive Translation Tab</h2>
+      <p>Choose a module and position your hand in the camera feed to start translating.</p>
+    </div>
+
+    <div class="main-card">
+      <div class="lab-tabs">
+        <div class="tab active" id="tab-alpha" onclick="switchTab('alpha')">Alphabet Signs</div>
+        <div class="tab" id="tab-dyn" onclick="switchTab('dynamic')">Gesture Signs</div>
+        <div class="tab" id="tab-conv" onclick="switchTab('conv')">Sentence Builder</div>
+      </div>
+
+      <div class="layout">
+        <div class="left-panel">
+          <div class="webcam">
+            <div class="live-tag">LIVE FEED</div>
+            <img src="/video_feed" alt="webcam">
+          </div>
+        </div>
+
+        <div class="right-panel">
+          
+          <div id="panel-alpha" class="module-panel">
+            <div class="gesture-text" id="alpha-letter">—</div>
+            
+            <div class="confidence-wrapper">
+              <span class="confidence-label" id="alpha-conf-label">Confidence: 0%</span>
+              <div class="confidence-bar-container">
+                <div class="confidence-bar-fill" id="alpha-bar"></div>
+              </div>
+            </div>
+
+            <div class="typed-box" id="typed-box">Typed Text</div>
+            <button class="btn-main" onclick="detectAlphabet()">Detect Letter</button>
+            <div class="btn-row">
+              <button class="btn-small" onclick="alphabetBackspace()">Backspace</button>
+              <button class="btn-small" onclick="alphabetSpace()">Space</button>
+              <button class="btn-small" onclick="alphabetClear()">Clear</button>
+            </div>
+            <button class="btn-speak" onclick="speakAlphabet()">🔊 Speak</button>
+          </div>
+
+          <div id="panel-dynamic" class="module-panel" style="display:none">
+            <div class="gesture-text" id="pred-gesture">—</div>
+
+            <div class="confidence-wrapper">
+              <span class="confidence-label" id="pred-conf-label">Confidence: 0%</span>
+              <div class="confidence-bar-container">
+                <div class="confidence-bar-fill" id="pred-bar"></div>
+              </div>
+            </div>
+            
+            <button class="btn-main" id="recordBtn" onclick="recordGesture()" style="margin-top: 20px;" >🎥 Record Gesture</button>
+            <button class="btn-speak" onclick="speakDynamic()">🔊 Speak</button>
+            <select id="dyn-lang" class="lang-select">
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="ta">Tamil</option>
+              <option value="ml">Malayalam</option>
+              <option value="te">Telugu</option>
+              <option value="kn">Kannada</option>
+            </select>
+          </div>
+
+          <div id="panel-conv" class="module-panel" style="display:none">
+            <div class="gesture-text" id="conv-gesture">—</div>
+
+            <div class="confidence-wrapper">
+              <span class="confidence-label" id="conv-conf-label">Confidence: 0%</span>
+              <div class="confidence-bar-container">
+                <div class="confidence-bar-fill" id="conv-bar"></div>
+              </div>
+            </div>
+
+            <div class="typed-box" id="conv-buffer">Empty Buffer</div>
+            <div class="btn-row">
+              <button class="btn-main" id="convRecordBtn" style="margin-bottom:0;" onclick="convRecord()">🎥 Record Word</button>
+              <button class="btn-small" onclick="convAdd()">Add</button>
+              <button class="btn-small" onclick="convClear()">Clear</button>
+            </div>
+            <button class="btn-generate" onclick="convGenerate()">✨ Generate Sentence</button>
+            <div class="typed-box" id="conv-sentence">Generated Sentence</div>
+            <button class="btn-speak" onclick="convSpeak()">🔊 Speak</button>
+            <select id="conv-lang" class="lang-select">
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="ta">Tamil</option>
+              <option value="ml">Malayalam</option>
+              <option value="te">Telugu</option>
+              <option value="kn">Kannada</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="padding:20px; text-align: center; color: white; font-size: 14px; background: #2563eb;">
+    &copy; 2026 Gestura: Sign Language Translation 
+  </footer>
+
+  <script>
+    /* --- SHARED HELPER FOR PROGRESS BAR --- */
+    function updateConfidenceUI(barId, labelId, percentage) {
+      const barFill = document.getElementById(barId);
+      const label = document.getElementById(labelId);
+      const value = parseFloat(percentage) || 0;
+
+      // Update Bar Width
+      barFill.style.width = value + "%";
+      label.textContent = "Confidence: " + value.toFixed(1) + "%";
+
+      // Interpolate Color (Red to Green)
+      // Low (0-40) = Red, Mid (40-70) = Orange/Yellow, High (70-100) = Green
+      if (value < 40) {
+        barFill.style.backgroundColor = "#ef4444"; // Red
+      } else if (value < 75) {
+        barFill.style.backgroundColor = "#f59e0b"; // Warning/Orange
+      } else {
+        barFill.style.backgroundColor = "#10b981"; // Success/Green
+      }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const activeTabId = (tab === 'dynamic' ? 'tab-dyn' : (tab === 'alpha' ? 'tab-alpha' : 'tab-conv'));
+      document.getElementById(activeTabId).classList.add('active');
+
+      document.getElementById('panel-alpha').style.display = 'none';
+      document.getElementById('panel-dynamic').style.display = 'none';
+      document.getElementById('panel-conv').style.display = 'none';
+
+      const activePanelId = 'panel-' + (tab === 'alpha' ? 'alpha' : (tab === 'dynamic' ? 'dynamic' : 'conv'));
+      document.getElementById(activePanelId).style.display = 'flex';
+      
+      if (tab === 'alpha') fetch('/alphabet_reset', { method: 'POST' }).catch(()=>{});
+    }
+
+    async function detectAlphabet() {
+      const alphaLetter = document.getElementById('alpha-letter');
+      const typedBox = document.getElementById('typed-box');
+      alphaLetter.textContent = '...';
+      try {
+        const res = await fetch('/predict_alphabet', { method: 'POST' });
+        const data = await res.json();
+        if (data.accepted) {
+          alphaLetter.textContent = data.accepted.letter.toUpperCase();
+          updateConfidenceUI('alpha-bar', 'alpha-conf-label', data.accepted.conf * 100);
+        } else {
+          alphaLetter.textContent = '—';
+          updateConfidenceUI('alpha-bar', 'alpha-conf-label', 0);
+        }
+        typedBox.textContent = data.typed_text || '';
+      } catch (err) { console.error(err); }
+    }
+
+    async function alphabetBackspace() {
+      const r = await fetch('/alphabet_backspace', { method: 'POST' });
+      const data = await r.json();
+      document.getElementById('typed-box').textContent = data.typed_text;
+    }
+
+    async function alphabetSpace() {
+      const r = await fetch('/alphabet_space', { method: 'POST' });
+      const data = await r.json();
+      document.getElementById('typed-box').textContent = data.typed_text;
+    }
+
+    async function alphabetClear() {
+      const r = await fetch('/alphabet_clear', { method: 'POST' });
+      const data = await r.json();
+      document.getElementById('typed-box').textContent = data.typed_text;
+    }
+
+    async function speakAlphabet() {
+      const r = await fetch('/alphabet_speak', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({lang: 'en'}) });
+      const blob = await r.blob();
+      new Audio(URL.createObjectURL(blob)).play();
+    }
+
+    async function recordGesture() {
+      const btn = document.getElementById('recordBtn');
+      btn.textContent = 'Recording...';
+      try {
+        const res = await fetch('/predict', { method: 'POST' });
+        const data = await res.json();
+        document.getElementById('pred-gesture').textContent = data.gesture;
+        updateConfidenceUI('pred-bar', 'pred-conf-label', parseFloat(data.confidence));
+      } finally { btn.textContent = '🎥 Record Gesture'; }
+    }
+
+    async function speakDynamic() {
+      const text = document.getElementById('pred-gesture').textContent;
+      const lang = document.getElementById('dyn-lang').value;
+      const r = await fetch('/speak', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text, lang}) });
+      const blob = await r.blob();
+      new Audio(URL.createObjectURL(blob)).play();
+    }
+
+    async function convRecord() {
+      const btn = document.getElementById('convRecordBtn');
+      btn.textContent = 'Listening...';
+      try {
+        const res = await fetch('/predict', { method: 'POST' });
+        const data = await res.json();
+        document.getElementById('conv-gesture').textContent = data.gesture;
+        updateConfidenceUI('conv-bar', 'conv-conf-label', parseFloat(data.confidence));
+      } finally { btn.textContent = '🎥 Record Word'; }
+    }
+
+    async function convAdd() {
+      const r = await fetch('/buffer/add', { method: 'POST' });
+      const d = await r.json();
+      document.getElementById('conv-buffer').textContent = d.buffer.join(" ") || "Empty Buffer";
+    }
+
+    async function convClear() {
+      const r = await fetch('/buffer/clear', { method: 'POST' });
+      const d = await r.json();
+      document.getElementById('conv-buffer').textContent = "Empty Buffer";
+      document.getElementById('conv-sentence').textContent = "Generated Sentence";
+      document.getElementById('conv-gesture').textContent = "—";
+      updateConfidenceUI('conv-bar', 'conv-conf-label', 0);
+    }
+
+    async function convGenerate() {
+      const r = await fetch('/buffer/generate', { method: 'POST' });
+      const d = await r.json();
+      document.getElementById('conv-sentence').textContent = d.sentence || "...";
+    }
+
+    async function convSpeak() {
+      const text = document.getElementById('conv-sentence').textContent;
+      const lang = document.getElementById('conv-lang').value;
+      const r = await fetch('/conversation/speak', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text, lang}) });
+      const blob = await r.blob();
+      new Audio(URL.createObjectURL(blob)).play();
+    }
+  </script>
+</body>
+</html>
