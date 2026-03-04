@@ -134,9 +134,12 @@ Gestura - Sign Language Translation using webcam input.
 
 ⚠️ This project uses real-time webcam input, so the full system runs locally.
 
-🎬 Demo video: [![Watch the demo](https://img.youtube.com/vi/vif9UEqb45w/0.jpg)](https://youtu.be/vif9UEqb45w) 
+🎬 Demo video: 
+
+[![Watch the demo](https://img.youtube.com/vi/vif9UEqb45w/0.jpg)](https://youtu.be/vif9UEqb45w) 
 
 ---
 ⭐ If you like this project, consider giving it a star!
+
 
 
